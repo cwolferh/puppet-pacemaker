@@ -8,8 +8,9 @@ Puppet::Type.type(:pcmk_resource).provide(:default) do
         if not @resource[:group].empty?
             cmd += ' --group ' + @resource[:group]
         end
+        Puppet.debug("clone is "+@resource[:clone].to_s)
         # clone defaults to false
-        if @resource[:clone]
+        if @resource[:clone] == :true
             cmd += ' --clone'
         end
         # do pcs create

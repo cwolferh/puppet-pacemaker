@@ -47,18 +47,27 @@ Puppet::Type.type(:pcmk_constraint).provide(:default) do
     private
 
     def pcs(name, cmd)
-        pcs_out = `/usr/sbin/pcs #{cmd}`
-        #puts name
-        #puts $?.exitstatus
-        #puts pcs_out
-        if $?.exitstatus != 0 and not name.include? 'show'
-            if pcs_out.lines.first 
-                raise Puppet::Error, "pcs #{name} failed: #{pcs_out.lines.first.chomp!}" if $?.exitstatus
-            else
-                raise Puppet::Error, "pcs #{name} failed" if $?.exitstatus
-            end
+        tries = self.resource[:tries]
+        try_sleep = self.resource[:try_sleep]
+
+        tries.times do |try|
+          pcs_out = `/usr/sbin/pcs #{cmd}`
+          #puts name
+          #puts $?.exitstatus
+          #puts pcs_out
+          if $?.exitstatus == 0
+             return pcs_out
+          end
+          if try_sleep > 0 and tries > 1
+            debug("Sleeping for #{try_sleep} seconds between pcmk_constraint tries")
+            sleep try_sleep
+          end
         end
-        # return output for good exit or false for failure.
+        if $?.exitstatus != 0 and not name.include? 'show'
+            raise Puppet::Error, "pcs #{name} failed: #{pcs_out.lines.first.chomp!}" if $?.exitstatus
+        else
+            raise Puppet::Error, "pcs #{name} failed" if $?.exitstatus
+        end
         $?.exitstatus == 0 ? pcs_out : false
     end
 end

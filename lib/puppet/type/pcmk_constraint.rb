@@ -23,4 +23,39 @@ Puppet::Type.newtype(:pcmk_constraint) do
         desc "Score"
     end
 
+    newparam(:tries) do
+      desc "The number of times to attempt to add the cosntraint
+        Defaults to '1'."
+
+      munge do |value|
+        if value.is_a?(String)
+          unless value =~ /^[\d]+$/
+            raise ArgumentError, "Tries must be an integer"
+          end
+          value = Integer(value)
+        end
+        raise ArgumentError, "Tries must be an integer >= 1" if value < 1
+        value
+      end
+
+      defaultto 1
+    end
+
+    newparam(:try_sleep) do
+      desc "The time to sleep in seconds between 'tries'."
+
+      munge do |value|
+        if value.is_a?(String)
+          unless value =~ /^[-\d.]+$/
+            raise ArgumentError, "try_sleep must be a number"
+          end
+          value = Float(value)
+        end
+        raise ArgumentError, "try_sleep cannot be a negative number" if value < 0
+        value
+      end
+
+      defaultto 0
+    end
+
 end

@@ -1,18 +1,19 @@
-define pacemaker::resource::lsb($group='',
-                                $clone=false,
-                                $interval='30s',
-                                $monitor_params=undef,
-                                $ensure='present',
-                                $options='') {
-
-  pcmk_resource { "${name}":
+define pacemaker::resource::lsb(
+  $ensure          = 'present',
+  $resource_params = '',
+  $op_params       = '',
+  $meta_params     = '',
+  $clone_params    = undef,
+  $group_params    = undef,
+  $service_name    = "{$name}",
+) {
+  pcmk_resource { $name:
     ensure          => $ensure,
-    resource_type   => "lsb:${name}",
-    resource_params => $options,
-    group           => $group,
-    clone           => $clone,
-    interval        => $interval,
-    monitor_params  => $monitor_params,
+    resource_type   => "lsb:${service_name}",
+    resource_params => $resource_params,
+    op_params       => $op_params,
+    meta_params     => $meta_params,
+    clone_params    => $clone_params,
+    group_params    => $group_params,
   }
-
 }

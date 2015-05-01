@@ -1,23 +1,24 @@
-define pacemaker::resource::ip($ip_address,
-                               $cidr_netmask=32,
-                               $nic='',
-                               $group='',
-                               $interval='30s',
-                               $monitor_params=undef,
-                               $ensure='present') {
+define pacemaker::resource::ip(
+  $ip_address,
+  $cidr_netmask = '',
+  $nic          = '',
+  $group_params = '',
+  $ensure       = 'present') {
 
+  $cidr_option = $cidr_netmask ? {
+      ''      => '',
+      default => " cidr=${cidr_netmask}"
+  }
   $nic_option = $nic ? {
       ''      => '',
-      default => " nic=$nic"
+      default => " nic=${nic}"
   }
 
   pcmk_resource { "ip-${ip_address}":
     ensure          => $ensure,
     resource_type   => 'IPaddr2',
-    resource_params => "ip=${ip_address} cidr_netmask=${cidr_netmask}${nic_option}",
-    group           => $group,
-    interval        => $interval,
-    monitor_params  => $monitor_params,
+    resource_params => "ip=${ip_address}$cidr_option${nic_option}",
+    group_params    => $group_params,
   }
 
 }
